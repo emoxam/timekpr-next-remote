@@ -47,6 +47,7 @@ Assuming your user is named "Adnan", and they added 15 minutes and had 1 hours a
 * Server that can run docker compose and can SSH to the clients you want to control
 * Client device runs linux and has SSH enable
 * Client device has Timekpr-nExT installed and configured to have a limited amount of time per day (<24 hrs ;)
+* Clients must be online, otherwise "Error" is shown suggesting the system might be off.  See the end of the "Docker start with gracefull error handling" video above for what this looks like.
 
 ### Server
 
@@ -139,6 +140,7 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 * [timekpr-server](https://github.com/frohmut/timekpr-server )- "Sample config server implementations and HTML UI for Timekpr"
 * [timekpr](https://github.com/frohmut/timekpr) - "Timekpr-Sync: Timekpr extension to spread user configurations in the home network"
 * [timekpr-cli](https://github.com/cisba/timekpr-cli) - "Simple Timekpr CLI" - local python wrapper script)
+* [timekpr-webui](https://github.com/adambie/timekpr-webui) - "Timekpr Remote Management Panel" - New (as of Apr 2025) project which looks to have offline client support and total time tracking.
 
 ## Development
 
