@@ -183,7 +183,8 @@
                 // todo - click doesn't work and radio spans accross users'
                 $("#people").append(
                     "<span class='user' id='" + user + rand_dom + "'>" +
-                        "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
+                        "<p class='h3'>" + user + " <small>(" + computer + ")</small><span class='notify loading'></span></p>" +
+			"<span class='limits'></span>"  +
                         "<span class='time_wrapper'>" +
                             "Unused: <span class='time time_left'>...</span> " +
                             "Used: " +
@@ -214,9 +215,55 @@
                 }, 1400);
                 $.getJSON( "/get_usage/" + computer + "/" + user, function( usage ) {
                     render_user_to_dom(user, computer, usage, rand_dom);
+		    get_limits(user, rand_dom);
                 });
             });
         });
+
+    
+
+        function get_limits(user, rand_dom) {
+            $.getJSON("/limits/" + user, function(limits) {
+                let formattedLimits = '';
+                const sortOrder = ["2", "3", "4", "5", "6", "7", "1"]; // Monday → Sunday
+        
+                sortOrder.forEach(function(day) {
+                    if (limits[day]) {
+                        const timeRanges = limits[day].split(";");
+                        const pairs = [];
+        
+                        for (let i = 0; i < timeRanges.length; i += 2) {
+                            let start = timeRanges[i];
+                            let end = timeRanges[i + 1];
+        
+                            if (end.includes("[")) {
+                                const minuteMatch = end.match(/\[(\d+)-(\d+)\]/);
+                                if (minuteMatch) {
+                                    end = end.replace(/\[\d+-\d+\]/, ":30");
+                                }
+                            } else {
+                                end = String(Number(end) + 1).padStart(2, "0") + ":00";
+                            }
+        
+                            start = start.includes(":") ? start : start.padStart(2, "0") + ":00";
+        
+                            pairs.push("from " + start + " to " + end);
+                        }
+        
+                        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                        const isoDayToIndex = { "1": 6, "2": 0, "3": 1, "4": 2, "5": 3, "6": 4, "7": 5 };
+                        const dayIndex = isoDayToIndex[day];
+        
+                        formattedLimits += "        " + daysOfWeek[dayIndex] + ": Hours: " + pairs.join(", ") + "<br>";
+                    }
+                });
+        
+                $('#' + user + rand_dom + " .limits").html(formattedLimits);
+            });
+        }
+
+
+
 
         function get_times(rand_dom){
             const second_options = [300, 900, 1800, 2700, 3600];

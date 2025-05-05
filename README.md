@@ -54,7 +54,7 @@ Assuming your user is named "Adnan", and they added 15 minutes and had 1 hours a
 1. clone this repo
 2. copy `conf.example.py` to `conf.py`
 3. edit `conf.py` per [Settings section](#Settings) below
-4. run `sudo docker-compose up -d`
+4. run `docker compose up -d`
 5. go to `http://your-server-IP:8080` on your phone or desktop
 
 ### Clients

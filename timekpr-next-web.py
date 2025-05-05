@@ -1,4 +1,5 @@
 import main
+import json
 import conf, re, os
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
@@ -63,6 +64,54 @@ def decrease_time(computer, user, seconds):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
         'favicon.ico',mimetype='image/vnd.microsoft.icon')
+
+
+
+def get_user_config_path(username):
+    return f"/var/lib/timekpr/config/timekpr.{username}.conf"
+
+@app.route('/limits/<username>', methods=['GET'])
+def get_limits(username):
+    path = get_user_config_path(username)
+    limits = {}
+    try:
+        with open(path, "r") as f:
+            for line in f:
+                if match := re.match(r"ALLOWED_HOURS_(\d)\s*=\s*(.+)", line):
+                    day, hours = match.groups()
+                    limits[day] = hours.strip()
+    except Exception as e:
+        return json.dumps({"error": str(e)}), 500
+    return json.dumps(limits), 200
+
+@app.route('/limits/<username>', methods=['POST'])
+def set_limits(username):
+    data = request.json
+    path = get_user_config_path(username)
+    try:
+        with open(path, "r") as f:
+            lines = f.readlines()
+        new_lines = []
+        for line in lines:
+            if match := re.match(r"ALLOWED_HOURS_(\d)\s*=", line):
+                day = match.group(1)
+                if day in data:
+                    new_lines.append(f"ALLOWED_HOURS_{day} = {data[day]}\n")
+                else:
+                    new_lines.append(line)
+            else:
+                new_lines.append(line)
+        with open(path, "w") as f:
+            f.writelines(new_lines)
+    except Exception as e:
+        return json.dumps({"error": str(e)}), 500
+    return json.dumps({"status": "ok"}), 200
+
+@app.route('/get_limit/<computer>/<username>', methods=['GET'])
+def get_limit(computer, username):
+    # Логика для получения лимита
+    limit = get_limit_from_database_or_file(computer, username)
+    return jsonify({"limit": limit})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
